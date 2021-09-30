@@ -1,0 +1,45 @@
+#default wordpress service compose file, place here anything 
+#that will be used local, CI, and Prod
+#still working out SSL reverse proxy
+
+version: '3'
+
+services: 
+
+  proxy:
+    image: nginx
+    ports: 
+      - 80:80
+      - 443:443
+    volumes:
+      - Users/ronnieturner/truhost/docker/proxy:/etc/nginx
+      - Users/ronnieturner/truhost/docker/proxy:/etc/ssl/private     
+      
+  wordpress:
+    image: wordpress
+    # ports:
+      # - 8080:80
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: ${TESTUSER}
+      WORDPRESS_DB_PASSWORD: ${TESTPASSWD}
+      WORDPRESS_DB_NAME: test-db
+      # HTTP_X_FORWARDED_PROTO: https
+    volumes:
+      - wordpress:/var/www/html
+  
+  
+  db:
+    image: mysql:5.7
+    restart: always
+    environment: 
+      MYSQL_DATABASE: test-db
+      MYSQL_USER: ${TESTUSER}
+      MYSQL_PASSWORD: ${TESTPASSWD}
+      MYSQL_RANDOM_ROOT_PASSWORD: '1'
+    volumes:
+     - db:/var/lib/mysql
+  
+volumes:
+  wordpress:
+  db:
